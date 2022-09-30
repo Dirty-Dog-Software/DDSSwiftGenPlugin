@@ -9,41 +9,41 @@ import PackagePlugin
 
 @main
 struct SwiftGenPlugin: CommandPlugin {
-  func performCommand(context: PluginContext, arguments: [String]) async throws {
-    let swiftgen = try context.tool(named: "swiftgen")
-    let fileManager = FileManager.default
+    func performCommand(context: PluginContext, arguments: [String]) async throws {
+        let swiftgen = try context.tool(named: "swiftgen")
+        let fileManager = FileManager.default
 
-    // if user provided arguments, use those
-    if !arguments.isEmpty {
-      try swiftgen.run(arguments: arguments, environment: env(context: context))
-    } else {
-      // otherwise scan for configs
-      let configuration = context.package.directory.appending("swiftgen.yml")
-      if fileManager.fileExists(atPath: configuration.string) {
-        try swiftgen.run(configuration, environment: env(context: context))
-      }
+        // if user provided arguments, use those
+        if !arguments.isEmpty {
+            try swiftgen.run(arguments: arguments, environment: env(context: context))
+        } else {
+            // otherwise scan for configs
+            let configuration = context.package.directory.appending("swiftgen.yml")
+            if fileManager.fileExists(atPath: configuration.string) {
+                try swiftgen.run(configuration, environment: env(context: context))
+            }
 
-      // check each target
-      let targets = context.package.targets.compactMap { $0 as? SourceModuleTarget }
-      for target in targets {
-        let configuration = target.directory.appending("swiftgen.yml")
-        if fileManager.fileExists(atPath: configuration.string) {
-          try swiftgen.run(configuration, environment: env(context: context, target: target))
+            // check each target
+            let targets = context.package.targets.compactMap { $0 as? SourceModuleTarget }
+            for target in targets {
+                let configuration = target.directory.appending("swiftgen.yml")
+                if fileManager.fileExists(atPath: configuration.string) {
+                    try swiftgen.run(configuration, environment: env(context: context, target: target))
+                }
+            }
         }
-      }
     }
-  }
 }
 
 private extension SwiftGenPlugin {
-  // Environment content for correct code generation
-  func env(context: PluginContext, target: SourceModuleTarget? = nil) -> [String: String] {
-    [
-      "PROJECT_DIR": context.package.directory.string,
-      "TARGET_NAME": target?.name ?? "",
-      "PRODUCT_MODULE_NAME": target?.moduleName ?? ""
-    ]
-  }
+    // Environment content for correct code generation
+    func env(context: PluginContext, target: SourceModuleTarget? = nil) -> [String: String] {
+        [
+            "PROJECT_DIR": context.package.directory.string,
+            "TARGET_NAME": target?.name ?? "",
+            "PRODUCT_MODULE_NAME": target?.moduleName ?? ""
+        ]
+    }
 }
 
 private extension PluginContext.Tool {
@@ -79,3 +79,46 @@ private extension PluginContext.Tool {
     }
   }
 }
+
+// Required for Xcode Projects
+#if canImport(XcodeProjectPlugin)
+import XcodeProjectPlugin
+
+extension SwiftGenPlugin: XcodeCommandPlugin {
+
+    func performCommand(context: XcodePluginContext, arguments: [String]) throws {
+        let swiftgen = try context.tool(named: "swiftgen")
+        let fileManager = FileManager.default
+
+        // if user provided arguments, use those
+        if !arguments.isEmpty {
+            try swiftgen.run(arguments: arguments, environment: env(context: context))
+        } else {
+            // otherwise scan for configs
+            let configuration = context.xcodeProject.directory.appending("swiftgen.yml")
+            if fileManager.fileExists(atPath: configuration.string) {
+                try swiftgen.run(configuration, environment: env(context: context))
+            }
+
+            // check each target
+            let targets = context.xcodeProject.targets.compactMap { $0 as? SourceModuleTarget }
+            for target in targets {
+                let configuration = target.directory.appending("swiftgen.yml")
+                if fileManager.fileExists(atPath: configuration.string) {
+                    try swiftgen.run(configuration, environment: env(context: context, target: target))
+                }
+            }
+        }
+    }
+}
+
+private extension SwiftGenPlugin {
+    func env(context: XcodePluginContext, target: SourceModuleTarget? = nil) -> [String: String] {
+      [
+        "PROJECT_DIR": context.xcodeProject.directory.string,
+        "TARGET_NAME": target?.name ?? "",
+        "PRODUCT_MODULE_NAME": target?.moduleName ?? ""
+      ]
+    }
+}
+#endif

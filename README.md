@@ -78,3 +78,50 @@ These plugins are powered by [SwiftGen](https://github.com/SwiftGen/SwiftGen).
 It is currently mainly maintained by [@AliSoftware](https://github.com/AliSoftware) and [@djbe](https://github.com/djbe). But I couldn't thank enough all the other [contributors](https://github.com/SwiftGen/SwiftGen/graphs/contributors) to this tool along the different versions which helped make SwiftGen awesome! 🎉
 
 If you want to contribute, don't hesitate to open a Pull Request, or even join the team!
+
+## GLD Notes
+
+### Usage 
+
+I installed a local version of swiftgen in ~/bin because there is no plugin command to `config init` or `config lint`
+
+```bash
+
+    swiftgen config init
+    swiftgen config lint
+    swiftgen config run
+    
+    swiftgen template
+    swiftgen template list
+
+```
+
+### ToDO
+
+* Clean up and remove duplicate code between the package and project plugins
+* Add command for `swiftgen config init`
+* Add command for `swiftgen config lint`
+* Add command for `swiftgen template list`
+
+### Referance
+
+```bash
+
+swiftgen template   
+OVERVIEW: Manage custom templates.
+
+USAGE: swiftgen template <subcommand>
+
+OPTIONS:
+  --version               Show the version.
+  -h, --help              Show help information.
+
+SUBCOMMANDS:
+  list                    List bundled and custom templates.
+  which                   Print path of a given named template.
+  cat                     Print path of a given named template.
+  doc                     Open the documentation for templates on GitHub.
+
+  See 'swiftgen help template <subcommand>' for detailed help.
+
+```
